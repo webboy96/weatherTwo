@@ -1,0 +1,56 @@
+QWidget{
+color:#ffffff;
+}
+QWidget#Widget
+{
+background-color: rgb(146, 146, 146);
+border-radius:30;
+}
+#widgetCity, #widgetCurrent,#widgetTodayForecast,#forecastTempWidget
+{
+background-color: #444444;
+color:#ffffff;
+border-radius: 30;
+}
+#widgetLittle1,#widgetLittle2,#widgetLittle3,#widgetLittle4,#widgetLittle4,#widgetLittle5,#widgetLittle6
+{
+background-color: rgb(55, 54, 54);
+border-radius: 30;
+}
+#cityLineEdit
+{
+background-color: rgb(68, 68, 68);
+border-top-left-radius: 10;
+border-bottom-left-radius: 10;
+padding-left:10;
+}
+#ExitPushButton
+{
+background-color: rgb(68, 68, 68);
+border-radius: 10;
+color:#fff;
+}
+#SendPushButton
+{
+background-color: rgb(68, 68, 68);
+border-top-right-radius: 10;
+border-bottom-right-radius: 10;
+color:#fff;
+}
+#MinusDaypushButton, #PlusDaypushButton
+{
+background-color: rgb(55, 54, 54);
+border-radius: 5;
+color:#fff;
+width:20;
+height:20;
+}
+#cityDayNothingDoLabel
+{
+margin-top:10;
+margin-bottom:10;
+font-size:8;
+}
+QAbstractItemView#completerPopup QWidget#qt_scrollarea_viewport {
+   background-color: rgb(55, 54, 54);
+}
