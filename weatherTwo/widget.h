@@ -83,5 +83,6 @@ public slots:
     void requestReadyToReadDedault(QJsonObject & obj);
     void requestReadyToReadChangeDay(QJsonObject & obj);
     void cityLineEditChanged(QString text);
+    void cityLineEditEditingFinished();
 };
 #endif // WIDGET_H

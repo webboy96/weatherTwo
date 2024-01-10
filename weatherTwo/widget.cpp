@@ -101,12 +101,18 @@ void Widget::createCityList()
     //completer->setCaseSensitivity(Qt::CaseInsensitive);
     //ui->cityLineEdit->setCompleter(completer);
     QObject::connect(ui->cityLineEdit,&QLineEdit::textEdited, this,&Widget::cityLineEditChanged);
+    QObject::connect(ui->cityLineEdit,&QLineEdit::editingFinished, this,&Widget::cityLineEditEditingFinished);
 }
 void Widget::cityLineEditChanged(QString text)
 {
     proxymodel->setFilterWildcard(text);
     ui->listView->show();
     qDebug() << "text = " << text;
+}
+
+void Widget::cityLineEditEditingFinished()
+{
+    ui->listView->hide();
 }
 void Widget::exitButtonActivate()
 {
