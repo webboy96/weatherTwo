@@ -2,11 +2,14 @@
 #include "ui_widget.h"
 
 
+
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    ui->listView->hide();
     exitButtonActivate();
     setStyleForWidget();
     setStyleForcityLineEdit();
@@ -85,12 +88,26 @@ void Widget::createCityList()
         citylist.append(getCityListItem->wordList[i].at(0));
     }
     QStringListModel * model = new QStringListModel();
+    QStringListModel * modelNew = new QStringListModel();
     model->setStringList(citylist);
-    QCompleter * completer = new QCompleter(model);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    ui->cityLineEdit->setCompleter(completer);
+    modelNew->setStringList(citylist);
+    proxymodel = new QSortFilterProxyModel();
+    proxymodel->setSourceModel(modelNew);
+    proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    //QListView * lstview = new QListView();
+    ui->listView->setModel(proxymodel);
+    //QCompleter * completer = new QCompleter(model);
+    //QStyledItemDelegate * itemDelegate = new QStyledItemDelegate();
+    //completer->setCaseSensitivity(Qt::CaseInsensitive);
+    //ui->cityLineEdit->setCompleter(completer);
+    QObject::connect(ui->cityLineEdit,&QLineEdit::textEdited, this,&Widget::cityLineEditChanged);
 }
-
+void Widget::cityLineEditChanged(QString text)
+{
+    proxymodel->setFilterWildcard(text);
+    ui->listView->show();
+    qDebug() << "text = " << text;
+}
 void Widget::exitButtonActivate()
 {
     QAbstractButton::connect(ui->ExitPushButton, &QPushButton::clicked, [=](){
@@ -479,6 +496,8 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
     setTodayForecastParametrs(weatherCode24HoursHoursQList,temp24HoursQList, windSpeed24HoursQList,windDirection24HoursQList);
     widgetsShow();
 }
+
+
 
 void Widget::defaultCityName()
 {

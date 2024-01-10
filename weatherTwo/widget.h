@@ -17,6 +17,9 @@
 #include <QJsonArray>
 #include <QSettings>
 #include <QTimeZone>
+#include <QSortFilterProxyModel>
+#include <QStyledItemDelegate>
+#include <QTableView>
 
 
 QT_BEGIN_NAMESPACE
@@ -65,6 +68,7 @@ private:
     QString longtitude;
     QString dateStart;
     QString dateFinish;
+    QSortFilterProxyModel * proxymodel;
     void setCurrentParametrs(QStringList parametrs);
     void setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp);
     void setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, QList<int> windSpeed, QList<int> windDirection);
@@ -78,5 +82,6 @@ public slots:
     void SendPushButtonClicked();
     void requestReadyToReadDedault(QJsonObject & obj);
     void requestReadyToReadChangeDay(QJsonObject & obj);
+    void cityLineEditChanged(QString text);
 };
 #endif // WIDGET_H
