@@ -27,6 +27,7 @@ Widget::Widget(QWidget *parent)
     QObject::connect(ui->MinusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(ui->PlusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
 
+
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
 
 }
@@ -102,6 +103,8 @@ void Widget::createCityList()
     //ui->cityLineEdit->setCompleter(completer);
     QObject::connect(ui->cityLineEdit,&QLineEdit::textEdited, this,&Widget::cityLineEditChanged);
     QObject::connect(ui->cityLineEdit,&QLineEdit::editingFinished, this,&Widget::cityLineEditEditingFinished);
+    QObject::connect(ui->cityLineEdit,&QLineEdit::clearButtonClicked, this,&Widget::cityLineEditEditingFinished);
+
 }
 void Widget::cityLineEditChanged(QString text)
 {
