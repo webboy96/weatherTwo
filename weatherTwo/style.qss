@@ -54,9 +54,4 @@ font-size:8;
 QAbstractItemView#completerPopup QWidget#qt_scrollarea_viewport {
    background-color: rgb(55, 54, 54);
 }
-#listView
-{
-background-color: rgb(68, 68, 68);
-max-height:40;
-border-radius: 0;
-}
+

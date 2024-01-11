@@ -9,7 +9,6 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-    ui->listView->hide();
     exitButtonActivate();
     setStyleForWidget();
     setStyleForcityLineEdit();
@@ -95,27 +94,40 @@ void Widget::createCityList()
     proxymodel = new QSortFilterProxyModel();
     proxymodel->setSourceModel(modelNew);
     proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    //QListView * lstview = new QListView();
-    ui->listView->setModel(proxymodel);
+    listView = new QListView(this);
+    listView->hide();
+    listView->setModel(proxymodel);
+    this->setMouseTracking(true);
+    //ui->listView->setModel(proxymodel);
     //QCompleter * completer = new QCompleter(model);
     //QStyledItemDelegate * itemDelegate = new QStyledItemDelegate();
     //completer->setCaseSensitivity(Qt::CaseInsensitive);
     //ui->cityLineEdit->setCompleter(completer);
     QObject::connect(ui->cityLineEdit,&QLineEdit::textEdited, this,&Widget::cityLineEditChanged);
     QObject::connect(ui->cityLineEdit,&QLineEdit::editingFinished, this,&Widget::cityLineEditEditingFinished);
-    QObject::connect(ui->cityLineEdit,&QLineEdit::clearButtonClicked, this,&Widget::cityLineEditEditingFinished);
+    //QObject::connect(ui->cityLineEdit,&QLineEdit::clearButtonClicked, this,&Widget::cityLineEditEditingFinished);
 
 }
 void Widget::cityLineEditChanged(QString text)
 {
+    QPoint cityLineEditPos = ui->cityLineEdit->mapTo(ui->cityLineEdit->window() , ui->cityLineEdit->pos());
+
+    qDebug() << "cityLineEditPos1 = " << cityLineEditPos ;
+    //QPoint cityLineEditPos = ui->cityLineEdit->mapToParent(ui->cityLineEdit->rect().topLeft());;
+    QPoint temp(0, ui->cityLineEdit->height()-10);
+    cityLineEditPos += temp;
+    qDebug() << "cityLineEditPos = " << cityLineEditPos;
     proxymodel->setFilterWildcard(text);
-    ui->listView->show();
+    listView->resize(ui->cityLineEdit->width(),60);
+    listView->move(cityLineEditPos);
+    listView->setStyleSheet("background-color: rgb(68, 68, 68);max-height:60;border-radius: 0;");
+    listView->show();
     qDebug() << "text = " << text;
 }
 
 void Widget::cityLineEditEditingFinished()
 {
-    ui->listView->hide();
+    listView->hide();
 }
 void Widget::exitButtonActivate()
 {
@@ -564,6 +576,7 @@ void Widget::defaultCityName()
 void Widget::SendPushButtonClicked()
 {
 
+    listView->hide();
     widgetsHide();
     cityFull =  ui->cityLineEdit->text();
     qDebug() << "cityFull = " << cityFull ;

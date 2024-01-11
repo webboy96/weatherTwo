@@ -20,6 +20,7 @@
 #include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 #include <QTableView>
+#include <QListView>
 
 
 QT_BEGIN_NAMESPACE
@@ -69,6 +70,7 @@ private:
     QString dateStart;
     QString dateFinish;
     QSortFilterProxyModel * proxymodel;
+    QListView * listView;
     void setCurrentParametrs(QStringList parametrs);
     void setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp);
     void setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, QList<int> windSpeed, QList<int> windDirection);
