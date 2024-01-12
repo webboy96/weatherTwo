@@ -21,6 +21,7 @@
 #include <QStyledItemDelegate>
 #include <QTableView>
 #include <QListView>
+#include <QLabel>
 
 
 QT_BEGIN_NAMESPACE
@@ -71,12 +72,14 @@ private:
     QString dateFinish;
     QSortFilterProxyModel * proxymodel;
     QListView * listView;
+    QLabel * maxDays;
     void setCurrentParametrs(QStringList parametrs);
     void setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp);
     void setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, QList<int> windSpeed, QList<int> windDirection);
     QString analyzeWeatherCode(int code);
     void widgetsHide();
     void widgetsShow();
+    void customToolTip(QPoint pos, QString text);
 
 public slots:
     void updateCurrentTime();
@@ -86,5 +89,6 @@ public slots:
     void requestReadyToReadChangeDay(QJsonObject & obj);
     void cityLineEditChanged(QString text);
     void cityLineEditEditingFinished();
+    void listViewClicked(const QModelIndex &index);
 };
 #endif // WIDGET_H

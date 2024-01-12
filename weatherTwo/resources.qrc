@@ -49,5 +49,13 @@
         <file>resources/images/header-snowy.png</file>
         <file>resources/images/header-sunny-cloudy.png</file>
         <file>resources/images/right/right_snowy.png</file>
+        <file>resources/images/loading/Spinner.gif</file>
+        <file>resources/images/loading/SpinnerNew.gif</file>
+        <file>resources/images/loading/Spinner2.svg</file>
+        <file>resources/images/loading/Spinner3.svg</file>
+        <file>resources/images/loading/Spinner4.svg</file>
+        <file>resources/images/loading/Spinner5.svg</file>
+        <file>resources/images/loading/Spinner6.gif</file>
+        <file>resources/images/loading/Spinner7.gif</file>
     </qresource>
 </RCC>

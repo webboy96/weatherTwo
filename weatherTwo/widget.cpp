@@ -1,6 +1,8 @@
 #include "widget.h"
 #include "ui_widget.h"
 
+#include <QMovie>
+
 
 
 
@@ -25,6 +27,7 @@ Widget::Widget(QWidget *parent)
     QObject::connect(ui->cityLineEdit,&QLineEdit::returnPressed, this, &Widget::SendPushButtonClicked);
     QObject::connect(ui->MinusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(ui->PlusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
+    QObject::connect(listView,&QListView::clicked, this,&Widget::listViewClicked);
 
 
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
@@ -120,10 +123,17 @@ void Widget::cityLineEditChanged(QString text)
     proxymodel->setFilterWildcard(text);
     listView->resize(ui->cityLineEdit->width(),60);
     listView->move(cityLineEditPos);
-    listView->setStyleSheet("background-color: rgb(68, 68, 68);max-height:60;border-radius: 0;");
+    listView->setStyleSheet("background-color: #444;max-height:100;border-bottom-right-radius: 10;border-bottom-left-radius: 10; color:#fff");
     listView->show();
     qDebug() << "text = " << text;
 }
+void Widget::listViewClicked(const QModelIndex &index)
+{
+    QString tempcity = index.data(Qt::DisplayRole).toString();
+    //qDebug() << "tempcity = " << tempcity;
+    ui->cityLineEdit->setText(tempcity);
+}
+
 
 void Widget::cityLineEditEditingFinished()
 {
@@ -190,6 +200,10 @@ void Widget::setCityName(QString cityName)
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     mpos = event->pos();
+    if (!ui->cityLineEdit->geometry().contains(mpos))
+    {
+        listView->hide();
+    }
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *event)
@@ -218,19 +232,48 @@ void Widget::updateCurrentTime()
 
 void Widget::dateChanged() // if +1 day plusminus = 1; -1 day plusminus = 0
 {
-
     widgetsHide();
+    QDateTime oldDate = QDateTime::currentDateTimeUtc().toTimeZone(QTimeZone(utc*3600));
+    QDateTime tempDate;
+    QString tooltipString;
     QObject * pushed = QObject::sender();
     if (pushed == ui->PlusDaypushButton)
     {
-        date = date.addDays(1);
+        tempDate = date.addDays(1);
+        tooltipString = "Достигнут максимальный прогнозный день";
     }
     else if (pushed == ui->MinusDaypushButton)
     {
-        date = date.addDays(-1);
+        tempDate = date.addDays(-1);
+        tooltipString = "Достигнут минимальный прогнозный день";
     }
-    setcityDateLabel();
-    changeDayReq();
+    qint64 days = oldDate.daysTo(tempDate);
+    if (days>-10 && days<10)
+    {
+        date = tempDate;
+        setcityDateLabel();
+        changeDayReq();
+
+        qDebug() << "dateChanged() days = " << days;
+    }
+    else
+    {
+        widgetsShow();
+        QPoint cityDayNothingDoLabelPos = ui->cityDayNothingDoLabel->mapTo(ui->cityDayNothingDoLabel->window() , QPoint(0,ui->cityDayNothingDoLabel->height()+10));
+        customToolTip(cityDayNothingDoLabelPos, tooltipString);
+        //qDebug() << "dateChanged() days = " << days;
+    }
+
+}
+
+void Widget::customToolTip(QPoint pos, QString text)
+{
+    maxDays = new QLabel(this);
+    maxDays->setText(text);
+    maxDays->setStyleSheet("background-color:#ffffff; color:#444444; padding:5; border-radius:5; font-size:10px;");
+    maxDays->move(pos);
+    maxDays->show();
+    QTimer::singleShot(3000, maxDays, &QLabel::deleteLater);
 }
 
 void Widget::requestReadyToReadDedault(QJsonObject & obj)
@@ -252,11 +295,11 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
     QStringList currentParametrs;
 
 
-//    qDebug() << "currentTemp = " << currentTemp;
-//    qDebug() << "currentHumidity = " << currentHumidity;
-//    qDebug() << "currentWeatherCode = " << currentWeatherCode;
-//    qDebug() << "currentWindDirection = " << currentWindDirection;
-//    qDebug() << "currentWindSpeed = " << currentWindSpeed;
+    //    qDebug() << "currentTemp = " << currentTemp;
+    //    qDebug() << "currentHumidity = " << currentHumidity;
+    //    qDebug() << "currentWeatherCode = " << currentWeatherCode;
+    //    qDebug() << "currentWindDirection = " << currentWindDirection;
+    //    qDebug() << "currentWindSpeed = " << currentWindSpeed;
 
     //sunrise
     QJsonObject dailyObj = obj["daily"].toObject();
@@ -395,11 +438,11 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
     QStringList currentParametrs;
 
 
-//    qDebug() << "currentTemp = " << currentTemp;
-//    qDebug() << "currentHumidity = " << currentHumidity;
-//    qDebug() << "currentWeatherCode = " << currentWeatherCode;
-//    qDebug() << "currentWindDirection = " << currentWindDirection;
-//    qDebug() << "currentWindSpeed = " << currentWindSpeed;
+    //    qDebug() << "currentTemp = " << currentTemp;
+    //    qDebug() << "currentHumidity = " << currentHumidity;
+    //    qDebug() << "currentWeatherCode = " << currentWeatherCode;
+    //    qDebug() << "currentWindDirection = " << currentWindDirection;
+    //    qDebug() << "currentWindSpeed = " << currentWindSpeed;
 
     //sunrise
     QJsonObject dailyObj = obj["daily"].toObject();
@@ -660,7 +703,7 @@ void Widget::setCurrentParametrs(QStringList parametrs)
 {
     // List of currentParametrs << currentTemp << currentHumidity << currentWeatherCode << currentWindSpeed << sunriseQList.at(0)<< sunsetQList.at(0);
     ui->currentTempLabel->setText(parametrs.at(0)+" °C");
-    ui->currentHumidityValueLabel->setText(parametrs.at(1)+"%");
+        ui->currentHumidityValueLabel->setText(parametrs.at(1)+"%");
     ui->currentSunriseTimeValueLabel->setText(parametrs.at(4));
     ui->currentSunsetTimeValueLabel->setText(parametrs.at(5));
     ui->currentWeatherSpeedValueLabel->setText(parametrs.at(3)+" км/ч");
@@ -672,11 +715,11 @@ void Widget::setCurrentParametrs(QStringList parametrs)
 void Widget::setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp)
 {
     ui->forecast1TempLabel->setText(QString::number(temp.at(0))+" °C");
-    ui->forecast2TempLabel->setText(QString::number(temp.at(1))+" °C");
-    ui->forecast3TempLabel->setText(QString::number(temp.at(2))+" °C");
-    ui->forecast4TempLabel->setText(QString::number(temp.at(3))+" °C");
-    ui->forecast5TempLabel->setText(QString::number(temp.at(4))+" °C");
-    QString res = analyzeWeatherCode(weatherCode.at(0));
+        ui->forecast2TempLabel->setText(QString::number(temp.at(1))+" °C");
+        ui->forecast3TempLabel->setText(QString::number(temp.at(2))+" °C");
+        ui->forecast4TempLabel->setText(QString::number(temp.at(3))+" °C");
+        ui->forecast5TempLabel->setText(QString::number(temp.at(4))+" °C");
+        QString res = analyzeWeatherCode(weatherCode.at(0));
     ui->forecast1Img->setPixmap(QPixmap(":/resources/images/right/right_" + res));
     res = analyzeWeatherCode(weatherCode.at(1));
     ui->forecast2Img->setPixmap(QPixmap(":/resources/images/right/right_" + res));
@@ -691,12 +734,12 @@ void Widget::setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp
 void Widget::setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, QList<int> windSpeed, QList<int> windDirection)
 {
     ui->todayForecastTemp1->setText(QString::number(temp.at(0))+" °C");
-    ui->todayForecastTemp2->setText(QString::number(temp.at(1))+" °C");
-    ui->todayForecastTemp3->setText(QString::number(temp.at(2))+" °C");
-    ui->todayForecastTemp4->setText(QString::number(temp.at(3))+" °C");
-    ui->todayForecastTemp5->setText(QString::number(temp.at(4))+" °C");
-    ui->todayForecastTemp6->setText(QString::number(temp.at(5))+" °C");
-    ui->todayForecastWindSpeed1->setText(QString::number(windSpeed.at(0))+" км/ч");
+        ui->todayForecastTemp2->setText(QString::number(temp.at(1))+" °C");
+        ui->todayForecastTemp3->setText(QString::number(temp.at(2))+" °C");
+        ui->todayForecastTemp4->setText(QString::number(temp.at(3))+" °C");
+        ui->todayForecastTemp5->setText(QString::number(temp.at(4))+" °C");
+        ui->todayForecastTemp6->setText(QString::number(temp.at(5))+" °C");
+        ui->todayForecastWindSpeed1->setText(QString::number(windSpeed.at(0))+" км/ч");
     ui->todayForecastWindSpeed2->setText(QString::number(windSpeed.at(1))+" км/ч");
     ui->todayForecastWindSpeed3->setText(QString::number(windSpeed.at(2))+" км/ч");
     ui->todayForecastWindSpeed4->setText(QString::number(windSpeed.at(3))+" км/ч");
@@ -769,10 +812,10 @@ QString Widget::analyzeWeatherCode(int code)
 
 void Widget::widgetsHide()
 {
-//    ui->widgetCity->hide();
-//    ui->widgetCurrent->hide();
-//    ui->widgetTodayForecast->hide();
-//    ui->forecastTempWidget->hide();
+    //    ui->widgetCity->hide();
+    //    ui->widgetCurrent->hide();
+    //    ui->widgetTodayForecast->hide();
+    //    ui->forecastTempWidget->hide();
     QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
     for (int i = 0; i< tempLabelList.size();i++)
     {
@@ -781,15 +824,28 @@ void Widget::widgetsHide()
     ui->MinusDaypushButton->hide();
     ui->PlusDaypushButton->hide();
 
+    QPoint pos1 = ui->widgetCity->mapTo(ui->widgetCity->window() , QPoint(0,0) + QPoint(ui->widgetCity->width()/2,ui->widgetCity->height()/2));
+    QLabel * lbl = new QLabel(this);
+    QMovie *mv = new QMovie("://resources/images/loading/Spinner7.gif");
+    lbl->resize(72,72);
+    pos1 = ui->widgetCity->rect().center();
+    pos1 = pos1 + QPoint(36,36);
+    lbl->move(pos1);
+    mv->start();
+    lbl->setAttribute(Qt::WA_NoSystemBackground);
+    lbl->setMovie(mv);
+
+
+
     //qDebug() << "tempLabel = " << tempLabel->text();
 }
 
 void Widget::widgetsShow()
 {
-//    ui->widgetCity->show();
-//    ui->widgetCurrent->show();
-//    ui->widgetTodayForecast->show();
-//    ui->forecastTempWidget->show();
+    //    ui->widgetCity->show();
+    //    ui->widgetCurrent->show();
+    //    ui->widgetTodayForecast->show();
+    //    ui->forecastTempWidget->show();
     QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
     for (int i = 0; i< tempLabelList.size();i++)
     {
@@ -798,6 +854,8 @@ void Widget::widgetsShow()
     ui->MinusDaypushButton->show();
     ui->PlusDaypushButton->show();
 }
+
+
 
 
 
