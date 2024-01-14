@@ -73,6 +73,8 @@ private:
     QSortFilterProxyModel * proxymodel;
     QListView * listView;
     QLabel * maxDays;
+    QLabel * labelLodaing[5];
+    QMovie * mvMovie;
     void setCurrentParametrs(QStringList parametrs);
     void setFiveDayForecastParametrs(QList<int> weatherCode, QList<int> temp);
     void setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, QList<int> windSpeed, QList<int> windDirection);

@@ -57,5 +57,6 @@
         <file>resources/images/loading/Spinner5.svg</file>
         <file>resources/images/loading/Spinner6.gif</file>
         <file>resources/images/loading/Spinner7.gif</file>
+        <file>resources/images/loading/dots1.gif</file>
     </qresource>
 </RCC>

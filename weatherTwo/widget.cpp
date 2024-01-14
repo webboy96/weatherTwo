@@ -821,19 +821,40 @@ void Widget::widgetsHide()
     {
         tempLabelList.at(i)->hide();
     }
+    QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
+    for (int i = 0; i< widgetTodayForecastList.size();i++)
+    {
+        widgetTodayForecastList.at(i)->hide();
+    }
     ui->MinusDaypushButton->hide();
     ui->PlusDaypushButton->hide();
 
-    QPoint pos1 = ui->widgetCity->mapTo(ui->widgetCity->window() , QPoint(0,0) + QPoint(ui->widgetCity->width()/2,ui->widgetCity->height()/2));
-    QLabel * lbl = new QLabel(this);
-    QMovie *mv = new QMovie("://resources/images/loading/Spinner7.gif");
-    lbl->resize(72,72);
-    pos1 = ui->widgetCity->rect().center();
-    pos1 = pos1 + QPoint(36,36);
-    lbl->move(pos1);
-    mv->start();
-    lbl->setAttribute(Qt::WA_NoSystemBackground);
-    lbl->setMovie(mv);
+    //loading animation on
+    int movieSize = 50;
+    QPoint pos1;
+    mvMovie = new QMovie("://resources/images/loading/Spinner7.gif");
+    mvMovie ->setScaledSize(QSize(movieSize,movieSize));
+    QList<QWidget *> widgetList;
+    widgetList.append(ui->widgetCity);
+    widgetList.append(ui->widgetCurrent);
+    widgetList.append(ui->widgetTodayForecast);
+    widgetList.append(ui->forecastTempWidget);
+    for (int i = 0; i<4; i++)
+    {
+    labelLodaing[i] = new QLabel(this);
+    labelLodaing[i]->resize(movieSize,movieSize);
+    pos1 = widgetList.at(i)->mapTo(widgetList.at(i)->window(), widgetList.at(i)->rect().center());
+    pos1 = pos1 - QPoint(movieSize/2,movieSize/2);
+    labelLodaing[i]->move(pos1);
+    labelLodaing[i]->setAttribute(Qt::WA_NoSystemBackground);
+    mvMovie ->start();
+    labelLodaing[i]->setMovie(mvMovie );
+    labelLodaing[i]->show();
+    }
+
+    QEventLoop loop;
+    QTimer::singleShot(500, &loop, SLOT(quit()));
+    loop.exec();
 
 
 
@@ -846,13 +867,30 @@ void Widget::widgetsShow()
     //    ui->widgetCurrent->show();
     //    ui->widgetTodayForecast->show();
     //    ui->forecastTempWidget->show();
+
+    //loading animation off
     QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
     for (int i = 0; i< tempLabelList.size();i++)
     {
         tempLabelList.at(i)->show();
     }
+    QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
+    for (int i = 0; i< widgetTodayForecastList.size();i++)
+    {
+        widgetTodayForecastList.at(i)->show();
+    }
+    mvMovie->stop();
+    for (int i = 0; i<4; i++)
+    {
+        labelLodaing[i]->hide();
+        labelLodaing[i]->clear();
+    }
+
+
     ui->MinusDaypushButton->show();
     ui->PlusDaypushButton->show();
+
+
 }
 
 
