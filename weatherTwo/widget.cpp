@@ -1,6 +1,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 
+#include <QCursor>
 #include <QMovie>
 
 
@@ -9,8 +10,10 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
+    ,trayMessageShown(false)
 {
     ui->setupUi(this);
+
     exitButtonActivate();
     setStyleForWidget();
     setStyleForcityLineEdit();
@@ -23,12 +26,18 @@ Widget::Widget(QWidget *parent)
     setcityDateLabel();
     setQTimer();
 
+
     QObject::connect(ui->SendPushButton,&QPushButton::clicked, this, &Widget::SendPushButtonClicked);
     QObject::connect(ui->cityLineEdit,&QLineEdit::returnPressed, this, &Widget::SendPushButtonClicked);
     QObject::connect(ui->MinusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(ui->PlusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(listView,&QListView::clicked, this,&Widget::listViewClicked);
+    createActions();
+    createTrayIcon();
+    setIcon();
 
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &Widget::iconActivated);
+    trayIcon->show();
 
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
 
@@ -109,17 +118,16 @@ void Widget::createCityList()
     QObject::connect(ui->cityLineEdit,&QLineEdit::textEdited, this,&Widget::cityLineEditChanged);
     QObject::connect(ui->cityLineEdit,&QLineEdit::editingFinished, this,&Widget::cityLineEditEditingFinished);
     //QObject::connect(ui->cityLineEdit,&QLineEdit::clearButtonClicked, this,&Widget::cityLineEditEditingFinished);
-
 }
 void Widget::cityLineEditChanged(QString text)
 {
     QPoint cityLineEditPos = ui->cityLineEdit->mapTo(ui->cityLineEdit->window() , ui->cityLineEdit->pos());
 
-    qDebug() << "cityLineEditPos1 = " << cityLineEditPos ;
+    //qDebug() << "cityLineEditPos1 = " << cityLineEditPos ;
     //QPoint cityLineEditPos = ui->cityLineEdit->mapToParent(ui->cityLineEdit->rect().topLeft());;
     QPoint temp(0, ui->cityLineEdit->height()-10);
     cityLineEditPos += temp;
-    qDebug() << "cityLineEditPos = " << cityLineEditPos;
+    //qDebug() << "cityLineEditPos = " << cityLineEditPos;
     proxymodel->setFilterWildcard(text);
     listView->resize(ui->cityLineEdit->width(),60);
     listView->move(cityLineEditPos);
@@ -142,9 +150,11 @@ void Widget::cityLineEditEditingFinished()
 void Widget::exitButtonActivate()
 {
     QAbstractButton::connect(ui->ExitPushButton, &QPushButton::clicked, [=](){
-        QApplication::quit();
-
+        //QApplication::quit();
+        hide();
+        showTrayMessage();
     });
+
 }
 
 void Widget::todayDateTime()
@@ -156,7 +166,7 @@ void Widget::setQTimer()
 {
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Widget::updateCurrentTime);
-    timer->start(1000);
+    timer->start(500);
 }
 
 QString Widget::returnDayOfTheWeek(QDateTime day)
@@ -214,6 +224,18 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
 
         this->move(newpos);
     }
+//        qDebug() << "x: " << event->pos();
+//        qDebug() << "y: " << event->pos().y();
+        QRectF trayIconX = trayIcon->geometry().toRectF();
+        //qDebug() << "Tray Icon Position: " << trayIconX;
+        //qDebug() << "x: = " << QCursor::pos().x() << " y = " << QCursor::pos().y();
+        if (trayIconX.contains(event->pos()))
+        {
+            qDebug() << "Tray Icon Hovered";
+        }
+
+
+
 }
 
 QString Widget::formURL(QString lat, QString longt, QString startDate, QString finishDate)
@@ -275,12 +297,98 @@ void Widget::customToolTip(QPoint pos, QString text)
     maxDays->show();
     QTimer::singleShot(3000, maxDays, &QLabel::deleteLater);
 }
+//For Tray
+void Widget::setIcon()
+{
+    QIcon icon = QIcon(":/resources/images/icon.png");
+    trayIcon->setIcon(icon);
+    trayIcon->setToolTip("Погода");
+    trayMessage = "Приложение Погода скрыто в панель задач";
+    setWindowIcon(icon);
+
+}
+
+void Widget::createTrayIcon()
+{
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(minimizeAction);
+    trayIconMenu->addAction(maximizeAction);
+    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayIconMenu);
+    trayIconMenu->setStyleSheet("color:#000;");
+
+
+}
+
+void Widget::createActions()
+{
+    minimizeAction = new QAction(tr("Mi&nimize"), this);
+    connect(minimizeAction, &QAction::triggered, this, &Widget::hide);
+    maximizeAction = new QAction(tr("Ma&ximize"), this);
+    connect(maximizeAction, &QAction::triggered, this, &Widget::showMaximized);
+    restoreAction = new QAction(tr("&Restore"), this);
+    connect(restoreAction, &QAction::triggered, this, &Widget::showNormal);
+    quitAction = new QAction(tr("&Quit"), this);
+    connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
+    //minimizeAction->setEnabled(true);
+    //maximizeAction->setEnabled(!isMaximized());
+    //restoreAction->setEnabled(isMaximized());
+    //QWidget::setVisible(true);
+}
+void Widget::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        Widget::showNormal();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    default:
+        ;
+    }
+}
+
+void Widget::closeEvent(QCloseEvent* e) {
+    //QMessageBox::information(this, "", "Close event received.");
+    //QMainWindow::closeEvent(e);
+    showTrayMessage();
+}
+
+void Widget::showTrayMessage()
+{
+    if (!trayMessageShown)
+    {
+       trayIcon->showMessage("Погода", trayMessage, trayIcon->icon(), 10000);
+       trayMessageShown = true;
+    }
+
+}
+
+//bool Widget::event(QEvent *ev)
+//{
+//    if (ev->type() == QEvent::MouseMove)
+//    {
+//       qDebug() << "x: = " << QCursor::pos().x() << " y = " << QCursor::pos().y();
+//    }
+//    QObject::event(ev);
+//    return true;
+//}
+
+void Widget::setTrayFilterEvent()
+{
+
+}
+
+
 
 void Widget::requestReadyToReadDedault(QJsonObject & obj)
 {
     qDebug() << "request finished. And got in the widget.";
     //qDebug() << "obj = " << obj;
-
     QJsonObject obj1 = obj["current"].toObject();
     QJsonValue currentTempJsonValue = obj1["temperature_2m"];
     QJsonValue currentHumidityJsonValue = obj1["relative_humidity_2m"];
@@ -885,12 +993,8 @@ void Widget::widgetsShow()
         labelLodaing[i]->hide();
         labelLodaing[i]->clear();
     }
-
-
     ui->MinusDaypushButton->show();
     ui->PlusDaypushButton->show();
-
-
 }
 
 

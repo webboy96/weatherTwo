@@ -43,7 +43,6 @@
         <file>resources/test.json</file>
         <file>resources/city.csv</file>
         <file>resources/defaultCity.txt</file>
-        <file>resources/images/icon.ico</file>
         <file>resources/images/header-cloudy.png</file>
         <file>resources/images/header-rainy.png</file>
         <file>resources/images/header-snowy.png</file>
@@ -58,5 +57,6 @@
         <file>resources/images/loading/Spinner6.gif</file>
         <file>resources/images/loading/Spinner7.gif</file>
         <file>resources/images/loading/dots1.gif</file>
+        <file>resources/images/icon.png</file>
     </qresource>
 </RCC>

@@ -22,6 +22,13 @@
 #include <QTableView>
 #include <QListView>
 #include <QLabel>
+//for tray
+#include <QSystemTrayIcon>
+#include <QAction>
+#include <QCoreApplication>
+#include <QCloseEvent>
+#include <QMenu>
+#include <QMessageBox>
 
 
 QT_BEGIN_NAMESPACE
@@ -82,6 +89,25 @@ private:
     void widgetsHide();
     void widgetsShow();
     void customToolTip(QPoint pos, QString text);
+
+    //for tray
+    QAction *minimizeAction;
+    QAction *maximizeAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+    QString trayMessage;
+    bool trayMessageShown;
+    void setIcon();
+    void createTrayIcon();
+    void createActions();
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void closeEvent(QCloseEvent* e);
+    void showTrayMessage();
+    void setTrayFilterEvent();
+    //bool event(QEvent* ev) override;
+
 
 public slots:
     void updateCurrentTime();
