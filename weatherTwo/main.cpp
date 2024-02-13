@@ -13,7 +13,12 @@ int main(int argc, char *argv[])
         return 1;
     }
     QApplication::setQuitOnLastWindowClosed(false);
-    Widget w;
+    //QWidget background(nullptr, Qt::FramelessWindowHint);
+    //background.setAttribute(Qt::WA_TranslucentBackground);
+    Widget w(nullptr, Qt::FramelessWindowHint);
+    w.setAttribute(Qt::WA_NoSystemBackground);
+    w.setAttribute(Qt::WA_TranslucentBackground);
+    w.setAttribute(Qt::WA_PaintOnScreen);
     w.show();
     return a.exec();
 }
