@@ -304,9 +304,11 @@ void Widget::setIcon()
 void Widget::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
-    trayIconMenu->addAction(minimizeAction);
-    trayIconMenu->addAction(maximizeAction);
+    //trayIconMenu->addAction(minimizeAction);
+    //trayIconMenu->addAction(maximizeAction);
+    //trayIconMenu->addSection(QIcon(":/resources/images/icon.png"),QString("Открыть"));
     trayIconMenu->addAction(restoreAction);
+
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
     trayIcon = new QSystemTrayIcon(this);
@@ -318,13 +320,15 @@ void Widget::createTrayIcon()
 
 void Widget::createActions()
 {
-    minimizeAction = new QAction(tr("Mi&nimize"), this);
-    connect(minimizeAction, &QAction::triggered, this, &Widget::hide);
-    maximizeAction = new QAction(tr("Ma&ximize"), this);
-    connect(maximizeAction, &QAction::triggered, this, &Widget::showMaximized);
-    restoreAction = new QAction(tr("&Restore"), this);
+    //minimizeAction = new QAction(tr("Mi&nimize"), this);
+    //connect(minimizeAction, &QAction::triggered, this, &Widget::hide);
+    //maximizeAction = new QAction(tr("Ma&ximize"), this);
+    //connect(maximizeAction, &QAction::triggered, this, &Widget::showMaximized);
+    restoreAction = new QAction(tr("&Открыть"), this);
+    restoreAction->setIcon(QIcon(":/resources/images/icon.png"));
     connect(restoreAction, &QAction::triggered, this, &Widget::showNormal);
-    quitAction = new QAction(tr("&Quit"), this);
+    quitAction = new QAction(tr("&Выйти"), this);
+    quitAction->setIcon(QIcon(":/resources/images/exit.png"));
     connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
     //minimizeAction->setEnabled(true);
     //maximizeAction->setEnabled(!isMaximized());
