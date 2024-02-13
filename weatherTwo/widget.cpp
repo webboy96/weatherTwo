@@ -396,7 +396,7 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
     QString currentHumidity = QString::number(currentHumidityJsonValue.toInt());
     QString currentWeatherCode = QString::number(currentWeatherCodeJsonValue.toInt());
     QString currentWindDirection = QString::number(currentWindDirectionJsonValue.toInt());
-    QString currentWindSpeed = QString::number(static_cast<int>(currentWindSpeedJsonValue.toDouble()));
+    QString currentWindSpeed = QString::number(static_cast<int>(currentWindSpeedJsonValue.toDouble()/3.6));
     QStringList currentParametrs;
 
 
@@ -464,7 +464,7 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
     for (int i = 4;i< 25;i = i+4)
     {
         double tempDouble = windSpeedArray[i].toDouble();
-        int tempInt = (int) tempDouble;
+        int tempInt = (int) tempDouble/3.6;
         windSpeed24HoursQList.append(tempInt);
         //    qDebug() << "windSpeedArray["<< i << "] = " << tempInt;
     }
@@ -539,7 +539,7 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
     QString currentHumidity = QString::number(currentHumidityJsonValue.toInt());
     QString currentWeatherCode = QString::number(currentWeatherCodeJsonValue.toInt());
     QString currentWindDirection = QString::number(currentWindDirectionJsonValue.toInt());
-    QString currentWindSpeed = QString::number(static_cast<int>(currentWindSpeedJsonValue.toDouble()));
+    QString currentWindSpeed = QString::number(static_cast<int>(currentWindSpeedJsonValue.toDouble()/3.6));
     QStringList currentParametrs;
 
 
@@ -607,7 +607,7 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
     for (int i = 4;i< 25;i = i+4)
     {
         double tempDouble = windSpeedArray[i].toDouble();
-        int tempInt = (int) tempDouble;
+        int tempInt = (int) tempDouble/3.6;
         windSpeed24HoursQList.append(tempInt);
         //    qDebug() << "windSpeedArray["<< i << "] = " << tempInt;
     }

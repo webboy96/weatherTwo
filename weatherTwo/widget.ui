@@ -841,10 +841,13 @@
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>15</height>
                </size>
               </property>
              </spacer>
@@ -1146,7 +1149,7 @@
               <item>
                <widget class="QLabel" name="currentWeatherSpeedValueLabel">
                 <property name="text">
-                 <string>2 км/ч</string>
+                 <string>2 м/с</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -1232,10 +1235,13 @@
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>40</height>
+                <height>15</height>
                </size>
               </property>
              </spacer>
@@ -1310,7 +1316,7 @@
           <rect>
            <x>20</x>
            <y>-3</y>
-           <width>241</width>
+           <width>251</width>
            <height>261</height>
           </rect>
          </property>
@@ -1388,7 +1394,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>15</width>
                 <height>20</height>
                </size>
               </property>
@@ -1480,7 +1486,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>15</width>
                 <height>20</height>
                </size>
               </property>
@@ -1572,7 +1578,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>15</width>
                 <height>20</height>
                </size>
               </property>
@@ -1647,7 +1653,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap>:/resources/images/right/right_snow.png</pixmap>
+               <pixmap resource="resources.qrc">:/resources/images/right/right_snowy.png</pixmap>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -1664,7 +1670,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>15</width>
                 <height>20</height>
                </size>
               </property>
@@ -1756,7 +1762,7 @@
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
+                <width>15</width>
                 <height>20</height>
                </size>
               </property>
@@ -2308,7 +2314,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -2681,7 +2687,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -3054,7 +3060,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -3427,7 +3433,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -3800,7 +3806,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -4173,7 +4179,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>3 км/ч</string>
+                     <string>3 м/с</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
