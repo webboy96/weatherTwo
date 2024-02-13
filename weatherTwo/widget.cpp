@@ -7,8 +7,8 @@
 
 
 
-Widget::Widget(QWidget *parent)
-    : QWidget(parent)
+Widget::Widget(QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
     , ui(new Ui::Widget)
     ,trayMessageShown(false)
 {
@@ -221,18 +221,11 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         QPoint diff = event->pos() - mpos;
         QPoint newpos = this->pos() + diff;
-
         this->move(newpos);
     }
 //        qDebug() << "x: " << event->pos();
 //        qDebug() << "y: " << event->pos().y();
-        QRectF trayIconX = trayIcon->geometry().toRectF();
-        //qDebug() << "Tray Icon Position: " << trayIconX;
-        //qDebug() << "x: = " << QCursor::pos().x() << " y = " << QCursor::pos().y();
-        if (trayIconX.contains(event->pos()))
-        {
-            qDebug() << "Tray Icon Hovered";
-        }
+
 
 
 
@@ -388,7 +381,7 @@ void Widget::setTrayFilterEvent()
 void Widget::requestReadyToReadDedault(QJsonObject & obj)
 {
     qDebug() << "request finished. And got in the widget.";
-    //qDebug() << "obj = " << obj;
+    qDebug() << "obj = " << obj;
     QJsonObject obj1 = obj["current"].toObject();
     QJsonValue currentTempJsonValue = obj1["temperature_2m"];
     QJsonValue currentHumidityJsonValue = obj1["relative_humidity_2m"];
@@ -708,9 +701,9 @@ void Widget::defaultCityName()
         setCityName(city);
         qDebug() << "default city = " << city;
         utc = getCityListItem->wordList[index].at(2).toInt();
-        latitude = getCityListItem->wordList[index].at(3);
-        longtitude = getCityListItem->wordList[index].at(4);
-        longtitude.chop(2);
+        latitude = getCityListItem->wordList[index].at(4);
+        longtitude = getCityListItem->wordList[index].at(3);
+        latitude.chop(2);
         qDebug() << "deafult utc = " << utc;
         qDebug() << "deafult latitude = " << latitude;
         qDebug() << "deafult longtitude = " << longtitude;
@@ -757,9 +750,9 @@ void Widget::SendPushButtonClicked()
         setCityName(city);
         qDebug() << "city = " << city;
         utc = getCityListItem->wordList[index].at(2).toInt();
-        latitude = getCityListItem->wordList[index].at(3);
-        longtitude = getCityListItem->wordList[index].at(4);
-        longtitude.chop(2);
+        latitude = getCityListItem->wordList[index].at(4);
+        longtitude = getCityListItem->wordList[index].at(3);
+        latitude.chop(2);
         todayDateTime();
         setcityDateLabel();
         qDebug() << "utc = " << utc;
@@ -785,7 +778,7 @@ void Widget::defaultReq()
     qDebug() << "date start = " << date.toString("yyyy-MM-dd");
     qDebug() << "finish start = " << newDate.toString("yyyy-MM-dd");
     QString url = formURL(longtitude, latitude, dateStart, dateFinish);
-    //    qDebug() << "url = " << url;
+    qDebug() << "url = " << url;
     req = new SendRequest();
     QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadDedault );
     req->tryRequest(url);
