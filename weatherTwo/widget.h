@@ -106,6 +106,7 @@ private:
     void closeEvent(QCloseEvent* e);
     void showTrayMessage();
     void setTrayFilterEvent();
+    bool checkInternetConnection();
     //bool event(QEvent* ev) override;
 
 

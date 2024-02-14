@@ -13,31 +13,30 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     ,trayMessageShown(false)
 {
     ui->setupUi(this);
-
+    widgetsHide();
     exitButtonActivate();
     setStyleForWidget();
     setStyleForcityLineEdit();
     createCityList();
     setQMapDayWeek();
     defaultCityName();
-    todayDateTime();
-    defaultReq();
+    //todayDateTime();
     updateCurrentTime();
-    setcityDateLabel();
+    //setcityDateLabel();
     setQTimer();
-
 
     QObject::connect(ui->SendPushButton,&QPushButton::clicked, this, &Widget::SendPushButtonClicked);
     QObject::connect(ui->cityLineEdit,&QLineEdit::returnPressed, this, &Widget::SendPushButtonClicked);
     QObject::connect(ui->MinusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(ui->PlusDaypushButton,&QPushButton::clicked, this, &Widget::dateChanged);
     QObject::connect(listView,&QListView::clicked, this,&Widget::listViewClicked);
+
     createActions();
     createTrayIcon();
     setIcon();
-
     connect(trayIcon, &QSystemTrayIcon::activated, this, &Widget::iconActivated);
     trayIcon->show();
+
 
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
 
@@ -380,12 +379,34 @@ void Widget::setTrayFilterEvent()
 
 }
 
+bool Widget::checkInternetConnection()
+{
+    QTcpSocket* sock = new QTcpSocket(this);
+    sock->connectToHost("www.google.com", 80);
+    bool connected = sock->waitForConnected(30000);//ms
+
+    if (!connected)
+    {
+       sock->abort();
+       return false;
+    }
+    sock->close();
+    return true;
+}
+
 
 
 void Widget::requestReadyToReadDedault(QJsonObject & obj)
 {
+    if (obj.isEmpty())
+    {
+       ui->cityLineEdit->clear();
+       ui->cityLineEdit->setPlaceholderText("Отсутствует интернет соединение...");
+    }
+    else
+    {
     qDebug() << "request finished. And got in the widget.";
-    qDebug() << "obj = " << obj;
+    //qDebug() << "obj = " << obj;
     QJsonObject obj1 = obj["current"].toObject();
     QJsonValue currentTempJsonValue = obj1["temperature_2m"];
     QJsonValue currentHumidityJsonValue = obj1["relative_humidity_2m"];
@@ -521,7 +542,7 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
     setFiveDayForecastParametrs(weatherCodeFiveForecastQList,tempFiveForecastQList);
     setTodayForecastParametrs(weatherCode24HoursHoursQList,temp24HoursQList, windSpeed24HoursQList,windDirection24HoursQList);
     widgetsShow();
-
+    }
 }
 
 void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
@@ -670,7 +691,7 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
 
 void Widget::defaultCityName()
 {
-    widgetsHide();
+
     QSettings settings("NewBestCorp", "WeatherApp");
     city = settings.value("city").toString();
     if (city == "" || city == " ")
@@ -696,27 +717,29 @@ void Widget::defaultCityName()
     }
     if (index != -1)
     {
-        qDebug() << "default index = " << index;
+        //qDebug() << "default index = " << index;
         city = getCityListItem->wordList[index].at(1);
         if (city == "")
         {
             city = getCityListItem->wordList[index].at(0);
         }
         setCityName(city);
-        qDebug() << "default city = " << city;
+        //qDebug() << "default city = " << city;
         utc = getCityListItem->wordList[index].at(2).toInt();
         latitude = getCityListItem->wordList[index].at(4);
         longtitude = getCityListItem->wordList[index].at(3);
         latitude.chop(2);
-        qDebug() << "deafult utc = " << utc;
-        qDebug() << "deafult latitude = " << latitude;
-        qDebug() << "deafult longtitude = " << longtitude;
+        //qDebug() << "deafult utc = " << utc;
+        //qDebug() << "deafult latitude = " << latitude;
+        //() << "deafult longtitude = " << longtitude;
 
         //        qDebug() << "date = " << date;
         //        qDebug() << "date start = " << date.toString("yyyy-MM-dd");
         //        QDateTime newdate = date.addDays(6);
         //        qDebug() << "finish start = " << newdate.toString("yyyy-MM-dd");
-
+        todayDateTime();
+        setcityDateLabel();
+        defaultReq();
     }
 }
 
@@ -782,7 +805,7 @@ void Widget::defaultReq()
     qDebug() << "date start = " << date.toString("yyyy-MM-dd");
     qDebug() << "finish start = " << newDate.toString("yyyy-MM-dd");
     QString url = formURL(longtitude, latitude, dateStart, dateFinish);
-    qDebug() << "url = " << url;
+    //qDebug() << "url = " << url;
     req = new SendRequest();
     QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadDedault );
     req->tryRequest(url);
@@ -917,10 +940,33 @@ QString Widget::analyzeWeatherCode(int code)
 
 void Widget::widgetsHide()
 {
-    //    ui->widgetCity->hide();
-    //    ui->widgetCurrent->hide();
-    //    ui->widgetTodayForecast->hide();
-    //    ui->forecastTempWidget->hide();
+    //loading animation
+    int movieSize = 50;
+    QPoint pos1;
+    mvMovie = new QMovie("://resources/images/loading/Spinner7.gif");
+    mvMovie ->setScaledSize(QSize(movieSize,movieSize));
+    QList<QWidget *> widgetList;
+    widgetList.append(ui->widgetCity);
+    widgetList.append(ui->widgetCurrent);
+    widgetList.append(ui->widgetTodayForecast);
+    widgetList.append(ui->forecastTempWidget);
+    for (int i = 0; i<4; i++)
+    {
+        labelLodaing[i] = new QLabel(widgetList.at(i));
+        labelLodaing[i]->resize(movieSize,movieSize);
+        //pos1 = widgetList.at(i)->mapTo(widgetList.at(i)->window(), widgetList.at(i)->rect().center());
+        pos1 = widgetList.at(i)->rect().center();
+        qDebug() << "pos1 = " << pos1;
+        //qDebug() << "pos2["<< i << "] = " << pos2[i];
+        pos1 = pos1 - QPoint(movieSize/2,movieSize/2);
+        labelLodaing[i]->setMovie(mvMovie);
+        mvMovie ->start();
+        labelLodaing[i]->move(pos1);
+        labelLodaing[i]->setAttribute(Qt::WA_NoSystemBackground);
+
+
+
+    }
     QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
     for (int i = 0; i< tempLabelList.size();i++)
     {
@@ -934,26 +980,10 @@ void Widget::widgetsHide()
     ui->MinusDaypushButton->hide();
     ui->PlusDaypushButton->hide();
 
-    //loading animation on
-    int movieSize = 50;
-    QPoint pos1;
-    mvMovie = new QMovie("://resources/images/loading/Spinner7.gif");
-    mvMovie ->setScaledSize(QSize(movieSize,movieSize));
-    QList<QWidget *> widgetList;
-    widgetList.append(ui->widgetCity);
-    widgetList.append(ui->widgetCurrent);
-    widgetList.append(ui->widgetTodayForecast);
-    widgetList.append(ui->forecastTempWidget);
+
+    //loading animation show
     for (int i = 0; i<4; i++)
     {
-    labelLodaing[i] = new QLabel(this);
-    labelLodaing[i]->resize(movieSize,movieSize);
-    pos1 = widgetList.at(i)->mapTo(widgetList.at(i)->window(), widgetList.at(i)->rect().center());
-    pos1 = pos1 - QPoint(movieSize/2,movieSize/2);
-    labelLodaing[i]->move(pos1);
-    labelLodaing[i]->setAttribute(Qt::WA_NoSystemBackground);
-    mvMovie ->start();
-    labelLodaing[i]->setMovie(mvMovie );
     labelLodaing[i]->show();
     }
 
@@ -968,11 +998,6 @@ void Widget::widgetsHide()
 
 void Widget::widgetsShow()
 {
-    //    ui->widgetCity->show();
-    //    ui->widgetCurrent->show();
-    //    ui->widgetTodayForecast->show();
-    //    ui->forecastTempWidget->show();
-
     //loading animation off
     QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
     for (int i = 0; i< tempLabelList.size();i++)

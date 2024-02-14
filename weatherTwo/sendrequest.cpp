@@ -29,19 +29,20 @@ void SendRequest::finishRequest()
     }
     else
     {
-        QFile file;
-        file.setFileName(":/resources/test.json");
-        if (file.open(QIODevice::ReadOnly))
-        {
-            while (!file.atEnd())
-            {
-                qDebug() << "Нет интернет соединения. Файл " << file.fileName() << " открыт!";
-                QByteArray data = file.readAll();
-                QJsonDocument jsondocument = QJsonDocument::fromJson(data);
-                obj = jsondocument.object();
-                emit finishJsonObjectCreate(obj);
-            }
-        }
+            emit finishJsonObjectCreate(obj);
+//        QFile file;
+//        file.setFileName(":/resources/test.json");
+//        if (file.open(QIODevice::ReadOnly))
+//        {
+//            while (!file.atEnd())
+//            {
+//                qDebug() << "Нет интернет соединения. Файл " << file.fileName() << " открыт!";
+//                QByteArray data = file.readAll();
+//                QJsonDocument jsondocument = QJsonDocument::fromJson(data);
+//                obj = jsondocument.object();
+//                emit finishJsonObjectCreate(obj);
+//            }
+//        }
     }
 }
 
