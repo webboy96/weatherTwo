@@ -1,4 +1,5 @@
-Приложение для просмотра погоды. Weather application.
+Weather application.
+Приложение для просмотра погоды. 
 
 Qt 6.5.2
 
