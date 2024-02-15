@@ -4231,6 +4231,53 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="widgetStatus" native="true">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>660</y>
+     <width>967</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>967</width>
+     <height>21</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>967</width>
+     <height>21</height>
+    </size>
+   </property>
+   <widget class="QLabel" name="statusLabel">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>967</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>967</width>
+      <height>18</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>967</width>
+      <height>18</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources>
   <include location="resources.qrc"/>

@@ -11,9 +11,13 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , ui(new Ui::Widget)
     ,trayMessageShown(false)
+    ,internet(false)
 {
     ui->setupUi(this);
+    hideMessage();
+
     widgetsHide();
+    loadingShow();
     exitButtonActivate();
     setStyleForWidget();
     setStyleForcityLineEdit();
@@ -22,6 +26,7 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     defaultCityName();
     //todayDateTime();
     updateCurrentTime();
+    checkInternetConnection();
     //setcityDateLabel();
     setQTimer();
 
@@ -36,8 +41,11 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     setIcon();
     connect(trayIcon, &QSystemTrayIcon::activated, this, &Widget::iconActivated);
     trayIcon->show();
+    QTimer *timerUpdateEveryHour = new QTimer(this);
+    connect(timerUpdateEveryHour, &QTimer::timeout, this, &Widget::defaultReq);
+    timerUpdateEveryHour->start(3600000);
 
-
+    //defaultReq();
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
 
 }
@@ -247,6 +255,7 @@ void Widget::updateCurrentTime()
 void Widget::dateChanged() // if +1 day plusminus = 1; -1 day plusminus = 0
 {
     widgetsHide();
+    loadingShow();
     QDateTime oldDate = QDateTime::currentDateTimeUtc().toTimeZone(QTimeZone(utc*3600));
     QDateTime tempDate;
     QString tooltipString;
@@ -272,6 +281,7 @@ void Widget::dateChanged() // if +1 day plusminus = 1; -1 day plusminus = 0
     }
     else
     {
+        loadingHide();
         widgetsShow();
         QPoint cityDayNothingDoLabelPos = ui->cityDayNothingDoLabel->mapTo(ui->cityDayNothingDoLabel->window() , QPoint(0,ui->cityDayNothingDoLabel->height()+10));
         customToolTip(cityDayNothingDoLabelPos, tooltipString);
@@ -381,17 +391,48 @@ void Widget::setTrayFilterEvent()
 
 bool Widget::checkInternetConnection()
 {
-    QTcpSocket* sock = new QTcpSocket(this);
-    sock->connectToHost("www.google.com", 80);
-    bool connected = sock->waitForConnected(30000);//ms
 
+    QTcpSocket* sock = new QTcpSocket(this);
+    sock->connectToHost("open-meteo.com", 80);
+    bool connected = sock->waitForConnected(5000);//ms
     if (!connected)
     {
+       if (ui->widgetStatus->isHidden())
+       {
+           showMessage(QString("Отсутствует интернет соединение..."));
+//           QTimer *timer = new QTimer(this);
+//           timer->setSingleShot(3000);
+
+//           connect(timer, &QTimer::timeout, [=]() {
+//               checkInternetConnection();
+//               timer->deleteLater();
+//           } );
+       }
+       internet = false;
        sock->abort();
        return false;
     }
+    if (!internet)
+    {
+       hideMessage();
+    }
     sock->close();
+    internet = true;
     return true;
+}
+
+void Widget::showMessage(QString message)
+{
+
+    ui->statusLabel->setText(message);
+    ui->widgetStatus->show();
+    ui->statusLabel->show();
+}
+
+void Widget::hideMessage()
+{
+    ui->statusLabel->show();
+    ui->widgetStatus->hide();
 }
 
 
@@ -400,8 +441,8 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
 {
     if (obj.isEmpty())
     {
-       ui->cityLineEdit->clear();
-       ui->cityLineEdit->setPlaceholderText("Отсутствует интернет соединение...");
+       //showMessage(QString("Отсутствует интернет соединение..."));
+       //qDebug() << "QJsonObject & obj is empty";
     }
     else
     {
@@ -542,9 +583,12 @@ void Widget::requestReadyToReadDedault(QJsonObject & obj)
     setFiveDayForecastParametrs(weatherCodeFiveForecastQList,tempFiveForecastQList);
     setTodayForecastParametrs(weatherCode24HoursHoursQList,temp24HoursQList, windSpeed24HoursQList,windDirection24HoursQList);
     widgetsShow();
+    loadingHide();
     }
 }
 
+
+// dell
 void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
 {
     qDebug() << "request finished. And got in the widget.";
@@ -685,6 +729,7 @@ void Widget::requestReadyToReadChangeDay(QJsonObject &obj)
     setFiveDayForecastParametrs(weatherCodeFiveForecastQList,tempFiveForecastQList);
     setTodayForecastParametrs(weatherCode24HoursHoursQList,temp24HoursQList, windSpeed24HoursQList,windDirection24HoursQList);
     widgetsShow();
+    loadingHide();
 }
 
 
@@ -739,6 +784,7 @@ void Widget::defaultCityName()
         //        qDebug() << "finish start = " << newdate.toString("yyyy-MM-dd");
         todayDateTime();
         setcityDateLabel();
+        checkInternetConnection();
         defaultReq();
     }
 }
@@ -749,6 +795,7 @@ void Widget::SendPushButtonClicked()
 
     listView->hide();
     widgetsHide();
+    loadingShow();
     cityFull =  ui->cityLineEdit->text();
     qDebug() << "cityFull = " << cityFull ;
     qDebug() << "cityFull length = " << cityFull.length() ;
@@ -799,6 +846,8 @@ void Widget::SendPushButtonClicked()
 void Widget::defaultReq()
 {
     //this->setStyleSheet("QLabel{color:transparent;}");
+    if (checkInternetConnection())
+    {
     dateStart = date.toString("yyyy-MM-dd");
     QDateTime newDate = date.addDays(5);
     dateFinish = newDate.toString("yyyy-MM-dd");
@@ -809,6 +858,7 @@ void Widget::defaultReq()
     req = new SendRequest();
     QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadDedault );
     req->tryRequest(url);
+    }
 }
 
 void Widget::changeDayReq()
@@ -822,7 +872,7 @@ void Widget::changeDayReq()
     QString url = formURL(longtitude, latitude, dateStart, dateFinish);
     //    qDebug() << "url = " << url;
     req = new SendRequest();
-    QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadChangeDay );
+    QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadDedault );
     req->tryRequest(url);
 }
 
@@ -940,6 +990,56 @@ QString Widget::analyzeWeatherCode(int code)
 
 void Widget::widgetsHide()
 {
+
+    QList<QWidget *> widgetList;
+    widgetList.append(ui->widgetCity);
+    widgetList.append(ui->widgetCurrent);
+    widgetList.append(ui->widgetTodayForecast);
+    widgetList.append(ui->forecastTempWidget);
+    for (int i = 0; i< widgetList.size();i++)
+    {
+        QList <QLabel *> tempLabelList = widgetList.at(i)->findChildren<QLabel *>();
+        QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
+        for (int i = 0; i< tempLabelList.size();i++)
+        {
+            tempLabelList.at(i)->hide();
+            widgetTodayForecastList.at(i)->hide();
+        }
+    }
+    ui->MinusDaypushButton->hide();
+    ui->PlusDaypushButton->hide();
+
+
+
+
+
+
+    //qDebug() << "tempLabel = " << tempLabel->text();
+}
+
+void Widget::widgetsShow()
+{
+
+    QList<QWidget *> widgetList;
+    widgetList.append(ui->widgetCity);
+    widgetList.append(ui->widgetCurrent);
+    widgetList.append(ui->widgetTodayForecast);
+    widgetList.append(ui->forecastTempWidget);
+    for (int i = 0; i< widgetList.size();i++)
+    {
+        QList <QLabel *> tempLabelList = widgetList.at(i)->findChildren<QLabel *>();
+        QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
+        for (int i = 0; i< tempLabelList.size();i++)
+        {
+            tempLabelList.at(i)->show();
+            widgetTodayForecastList.at(i)->show();
+        }
+    }
+
+}
+
+void Widget::loadingShow()
+{
     //loading animation
     int movieSize = 50;
     QPoint pos1;
@@ -963,52 +1063,20 @@ void Widget::widgetsHide()
         mvMovie ->start();
         labelLodaing[i]->move(pos1);
         labelLodaing[i]->setAttribute(Qt::WA_NoSystemBackground);
-
-
-
     }
-    QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
-    for (int i = 0; i< tempLabelList.size();i++)
-    {
-        tempLabelList.at(i)->hide();
-    }
-    QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
-    for (int i = 0; i< widgetTodayForecastList.size();i++)
-    {
-        widgetTodayForecastList.at(i)->hide();
-    }
-    ui->MinusDaypushButton->hide();
-    ui->PlusDaypushButton->hide();
-
-
     //loading animation show
     for (int i = 0; i<4; i++)
     {
-    labelLodaing[i]->show();
+        labelLodaing[i]->show();
     }
 
     QEventLoop loop;
     QTimer::singleShot(500, &loop, SLOT(quit()));
     loop.exec();
-
-
-
-    //qDebug() << "tempLabel = " << tempLabel->text();
 }
 
-void Widget::widgetsShow()
+void Widget::loadingHide()
 {
-    //loading animation off
-    QList <QLabel *> tempLabelList = this->findChildren<QLabel *>();
-    for (int i = 0; i< tempLabelList.size();i++)
-    {
-        tempLabelList.at(i)->show();
-    }
-    QList <QWidget *> widgetTodayForecastList = ui->widgetTodayForecast->findChildren<QWidget *>();
-    for (int i = 0; i< widgetTodayForecastList.size();i++)
-    {
-        widgetTodayForecastList.at(i)->show();
-    }
     mvMovie->stop();
     for (int i = 0; i<4; i++)
     {

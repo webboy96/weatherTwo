@@ -88,6 +88,8 @@ private:
     QString analyzeWeatherCode(int code);
     void widgetsHide();
     void widgetsShow();
+    void loadingShow();
+    void loadingHide();
     void customToolTip(QPoint pos, QString text);
 
     //for tray
@@ -106,7 +108,10 @@ private:
     void closeEvent(QCloseEvent* e);
     void showTrayMessage();
     void setTrayFilterEvent();
+    bool internet;
     bool checkInternetConnection();
+    void showMessage(QString message);
+    void hideMessage();
     //bool event(QEvent* ev) override;
 
 
