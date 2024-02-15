@@ -44,6 +44,9 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     QTimer *timerUpdateEveryHour = new QTimer(this);
     connect(timerUpdateEveryHour, &QTimer::timeout, this, &Widget::defaultReq);
     timerUpdateEveryHour->start(3600000);
+    QTimer *timerInternet = new QTimer(this);
+    connect(timerInternet, &QTimer::timeout, this, &Widget::checkInternetConnection);
+    timerInternet->start(10000);
 
     //defaultReq();
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
@@ -400,13 +403,6 @@ bool Widget::checkInternetConnection()
        if (ui->widgetStatus->isHidden())
        {
            showMessage(QString("Отсутствует интернет соединение..."));
-//           QTimer *timer = new QTimer(this);
-//           timer->setSingleShot(3000);
-
-//           connect(timer, &QTimer::timeout, [=]() {
-//               checkInternetConnection();
-//               timer->deleteLater();
-//           } );
        }
        internet = false;
        sock->abort();
@@ -415,6 +411,7 @@ bool Widget::checkInternetConnection()
     if (!internet)
     {
        hideMessage();
+       defaultReq();
     }
     sock->close();
     internet = true;
@@ -784,7 +781,6 @@ void Widget::defaultCityName()
         //        qDebug() << "finish start = " << newdate.toString("yyyy-MM-dd");
         todayDateTime();
         setcityDateLabel();
-        checkInternetConnection();
         defaultReq();
     }
 }
@@ -846,8 +842,7 @@ void Widget::SendPushButtonClicked()
 void Widget::defaultReq()
 {
     //this->setStyleSheet("QLabel{color:transparent;}");
-    if (checkInternetConnection())
-    {
+
     dateStart = date.toString("yyyy-MM-dd");
     QDateTime newDate = date.addDays(5);
     dateFinish = newDate.toString("yyyy-MM-dd");
@@ -858,7 +853,6 @@ void Widget::defaultReq()
     req = new SendRequest();
     QObject::connect(req, &SendRequest::finishJsonObjectCreate, this, &Widget::requestReadyToReadDedault );
     req->tryRequest(url);
-    }
 }
 
 void Widget::changeDayReq()
