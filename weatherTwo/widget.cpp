@@ -26,7 +26,10 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     defaultCityName();
     //todayDateTime();
     updateCurrentTime();
-    checkInternetConnection();
+    timerInternet = new QTimer(this);
+    connect(timerInternet, &QTimer::timeout, this, &Widget::checkInternetConnection);
+    timerInternet->start(1000);
+    //checkInternetConnection();
     //setcityDateLabel();
     setQTimer();
 
@@ -44,9 +47,6 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f)
     QTimer *timerUpdateEveryHour = new QTimer(this);
     connect(timerUpdateEveryHour, &QTimer::timeout, this, &Widget::defaultReq);
     timerUpdateEveryHour->start(3600000);
-    QTimer *timerInternet = new QTimer(this);
-    connect(timerInternet, &QTimer::timeout, this, &Widget::checkInternetConnection);
-    timerInternet->start(10000);
 
     //defaultReq();
     //QObject::connect(date,&QDateTime::dateChanged, this, &Widget::todayDateTime);
@@ -257,6 +257,7 @@ void Widget::updateCurrentTime()
 
 void Widget::dateChanged() // if +1 day plusminus = 1; -1 day plusminus = 0
 {
+    timerInternet->setInterval(1000);
     widgetsHide();
     loadingShow();
     QDateTime oldDate = QDateTime::currentDateTimeUtc().toTimeZone(QTimeZone(utc*3600));
@@ -403,18 +404,28 @@ bool Widget::checkInternetConnection()
        if (ui->widgetStatus->isHidden())
        {
            showMessage(QString("Отсутствует интернет соединение..."));
+           qDebug() << "Now you are offline!";
+           timerInternet->setInterval(3000);
        }
+       else
+       {
+           timerInternet->setInterval(10000);
+       }
+       qDebug() << "You still have no internet!";
        internet = false;
        sock->abort();
        return false;
     }
     if (!internet)
     {
+       internet = true;
+       qDebug() << "Now you are online!";
        hideMessage();
+       timerInternet->setInterval(1800000);
        defaultReq();
     }
+    qDebug() << "Wow you are still have internet!";
     sock->close();
-    internet = true;
     return true;
 }
 
@@ -788,7 +799,7 @@ void Widget::defaultCityName()
 
 void Widget::SendPushButtonClicked()
 {
-
+    timerInternet->setInterval(1000);
     listView->hide();
     widgetsHide();
     loadingShow();

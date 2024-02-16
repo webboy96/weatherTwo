@@ -112,6 +112,7 @@ private:
     bool checkInternetConnection();
     void showMessage(QString message);
     void hideMessage();
+    QTimer *timerInternet;
     //bool event(QEvent* ev) override;
 
 
