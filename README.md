@@ -1,6 +1,6 @@
 Weather application.
 Приложение для просмотра погоды. 
-ver 1.0.0
+ver 1.0.1
 
 Qt 6.5.2
 
