@@ -150,6 +150,7 @@ void Widget::listViewClicked(const QModelIndex &index)
     QString tempcity = index.data(Qt::DisplayRole).toString();
     //qDebug() << "tempcity = " << tempcity;
     ui->cityLineEdit->setText(tempcity);
+
 }
 
 
@@ -220,10 +221,12 @@ void Widget::setCityName(QString cityName)
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     mpos = event->pos();
-    if (!ui->cityLineEdit->geometry().contains(mpos))
+    if (ui->cityLineEdit->geometry().contains(mpos))
     {
         listView->hide();
     }
+        qDebug() << mpos;
+
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *event)
@@ -321,7 +324,6 @@ void Widget::createTrayIcon()
     //trayIconMenu->addAction(maximizeAction);
     //trayIconMenu->addSection(QIcon(":/resources/images/icon.png"),QString("Открыть"));
     trayIconMenu->addAction(restoreAction);
-
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
     trayIcon = new QSystemTrayIcon(this);
@@ -424,6 +426,7 @@ bool Widget::checkInternetConnection()
        timerInternet->setInterval(1800000);
        defaultReq();
     }
+    timerInternet->setInterval(1800000);
     qDebug() << "Wow you are still have internet!";
     sock->close();
     return true;
@@ -889,7 +892,7 @@ void Widget::setCurrentParametrs(QStringList parametrs)
         ui->currentHumidityValueLabel->setText(parametrs.at(1)+"%");
     ui->currentSunriseTimeValueLabel->setText(parametrs.at(4));
     ui->currentSunsetTimeValueLabel->setText(parametrs.at(5));
-    ui->currentWeatherSpeedValueLabel->setText(parametrs.at(3)+" км/ч");
+    ui->currentWeatherSpeedValueLabel->setText(parametrs.at(3)+" м/с");
     int code = parametrs.at(2).toInt();
     QString res = analyzeWeatherCode(code);
     ui->currentWeatherImg->setPixmap(QPixmap(":/resources/images/header-" + res));
@@ -922,12 +925,12 @@ void Widget::setTodayForecastParametrs(QList<int> weatherCode, QList<int> temp, 
         ui->todayForecastTemp4->setText(QString::number(temp.at(3))+" °C");
         ui->todayForecastTemp5->setText(QString::number(temp.at(4))+" °C");
         ui->todayForecastTemp6->setText(QString::number(temp.at(5))+" °C");
-        ui->todayForecastWindSpeed1->setText(QString::number(windSpeed.at(0))+" км/ч");
-    ui->todayForecastWindSpeed2->setText(QString::number(windSpeed.at(1))+" км/ч");
-    ui->todayForecastWindSpeed3->setText(QString::number(windSpeed.at(2))+" км/ч");
-    ui->todayForecastWindSpeed4->setText(QString::number(windSpeed.at(3))+" км/ч");
-    ui->todayForecastWindSpeed5->setText(QString::number(windSpeed.at(4))+" км/ч");
-    ui->todayForecastWindSpeed6->setText(QString::number(windSpeed.at(5))+" км/ч");
+        ui->todayForecastWindSpeed1->setText(QString::number(windSpeed.at(0))+" м/с");
+    ui->todayForecastWindSpeed2->setText(QString::number(windSpeed.at(1))+" м/с");
+    ui->todayForecastWindSpeed3->setText(QString::number(windSpeed.at(2))+" м/с");
+    ui->todayForecastWindSpeed4->setText(QString::number(windSpeed.at(3))+" м/с");
+    ui->todayForecastWindSpeed5->setText(QString::number(windSpeed.at(4))+" м/с");
+    ui->todayForecastWindSpeed6->setText(QString::number(windSpeed.at(5))+" м/с");
     QString res = analyzeWeatherCode(weatherCode.at(0));
     ui->todayForecastImg1->setPixmap(QPixmap(":/resources/images/main/" + res));
     res = analyzeWeatherCode(weatherCode.at(1));
