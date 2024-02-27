@@ -813,6 +813,8 @@ void Widget::SendPushButtonClicked()
     {
         ui->cityLineEdit->clear();
         ui->cityLineEdit->setPlaceholderText("Пожалуйста, введите название города и попробуйте еще раз...");
+        widgetsShow();
+        loadingHide();
         return;
     }
     int index = -1;
@@ -848,6 +850,8 @@ void Widget::SendPushButtonClicked()
     {
         ui->cityLineEdit->clear();
         ui->cityLineEdit->setPlaceholderText("Город не найден. Пожалуйста, попробуйте ввести название повторно...");
+        widgetsShow();
+        loadingHide();
         return;
     }
 }
